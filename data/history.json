@@ -1,0 +1,26 @@
+[
+  {
+    "time": "2026-06-08T15:46:10.092209",
+    "title": "Harry Potter Fun Book",
+    "author": "warner bros.",
+    "publisher": "scholastic, inc",
+    "jumlah_pinjam": 1,
+    "year": 2001,
+    "result": 1,
+    "label": "📚 Populer",
+    "source": "batch",
+    "filename": "data_peminjaman_2026-05-05.csv"
+  },
+  {
+    "time": "2026-06-08T15:46:10.092209",
+    "title": "Liebesfluchten: Geschichten",
+    "author": "bernhard schlink",
+    "publisher": "diogenes",
+    "jumlah_pinjam": 1,
+    "year": 2000,
+    "result": 1,
+    "label": "📚 Populer",
+    "source": "batch",
+    "filename": "data_peminjaman_2026-05-05.csv"
+  }
+]

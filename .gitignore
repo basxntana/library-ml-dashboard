@@ -1,0 +1,14 @@
+# Environment Python (buat ulang dengan: pip install -r requirements.txt)
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Model 112MB melebihi batas GitHub (100MB) — buat ulang lewat notebooks/train_model.ipynb
+models/*.pkl
+
+# Log runtime
+logs/*.log
+
+# File sistem
+.DS_Store

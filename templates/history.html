@@ -1,0 +1,702 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* ===== HEADER ===== */
+.rw-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.rw-header-left h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+}
+.rw-header-left p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+.rw-header-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.btn-outline {
+    background: #fff;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+.btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-danger {
+    background: #fff5f5;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+.btn-danger:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+/* ===== STAT CARDS ===== */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+}
+.stat-card.s-dark::before   { background: linear-gradient(90deg, #0f172a, #334155); }
+.stat-card.s-green::before  { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.stat-card.s-red::before    { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.stat-card.s-blue::before   { background: linear-gradient(90deg, #4f46e5, #6366f1); }
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin: 0 0 8px;
+}
+.stat-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+    margin: 0;
+}
+.stat-card.s-green .stat-value { color: #16a34a; }
+.stat-card.s-red .stat-value   { color: #dc2626; }
+.stat-card.s-blue .stat-value  { color: #4f46e5; }
+
+/* ===== TOOLBAR ===== */
+.toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+.search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+.search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #0f172a;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: inherit;
+}
+.search-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.filter-select {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.18s;
+    font-family: inherit;
+}
+.filter-select:focus { border-color: #6366f1; }
+
+/* ===== TABLE PANEL ===== */
+.panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+td {
+    padding: 13px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; }
+tbody tr:hover td { background: #f8fafc; }
+
+.td-title {
+    font-weight: 500;
+    color: #0f172a;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.td-truncate {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.td-mono {
+    font-variant-numeric: tabular-nums;
+    font-size: 12.5px;
+    color: #475569;
+}
+.td-time {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-pop  { background: #dcfce7; color: #166534; }
+.badge-tidak { background: #fee2e2; color: #991b1b; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+.badge-pop .badge-dot  { background: #16a34a; }
+.badge-tidak .badge-dot { background: #ef4444; }
+
+.badge-source {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #fef3c7;
+    color: #92400e;
+}
+.badge-source-single {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    padding: 72px 24px;
+    text-align: center;
+    display: none;
+}
+.empty-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 6px;
+}
+.empty-state p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+    gap: 12px;
+    display: none;
+}
+.pagination.show { display: flex; }
+
+.pages {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.page-btn {
+    width: 34px; height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.page-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+.page-btn.active {
+    background: linear-gradient(135deg, #4f46e5, #4f46e5);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+}
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== TOAST ===== */
+.toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: rgba(15,23,42,0.95);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.25);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 9999;
+    max-width: 320px;
+    backdrop-filter: blur(8px);
+    font-family: inherit;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeRow {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<!-- ===== HEADER ===== -->
+<div class="rw-header">
+    <div class="rw-header-left">
+        <h2>Riwayat Prediksi</h2>
+        <p>Log semua prediksi single dan batch yang telah dilakukan</p>
+    </div>
+    <div class="rw-header-right">
+        <button class="btn btn-outline" onclick="downloadHistory()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download CSV
+        </button>
+        <button class="btn btn-danger" onclick="confirmClear()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+            </svg>
+            Hapus Semua
+        </button>
+    </div>
+</div>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="stat-grid">
+    <div class="stat-card s-dark">
+        <div class="stat-label">Total Prediksi</div>
+        <div class="stat-value" id="statTotal">0</div>
+    </div>
+    <div class="stat-card s-green">
+        <div class="stat-label">Populer</div>
+        <div class="stat-value" id="statPop">0</div>
+    </div>
+    <div class="stat-card s-red">
+        <div class="stat-label">Tidak Populer</div>
+        <div class="stat-value" id="statTidak">0</div>
+    </div>
+    <div class="stat-card s-blue">
+        <div class="stat-label">Rasio Populer</div>
+        <div class="stat-value" id="statRate">0%</div>
+    </div>
+</div>
+
+<!-- ===== TOOLBAR ===== -->
+<div class="toolbar">
+    <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Cari judul buku, author, atau publisher..." oninput="handleSearch()">
+    </div>
+
+    <select class="filter-select" id="filterStatus" onchange="handleSearch()">
+        <option value="">Semua Status</option>
+        <option value="1">Populer</option>
+        <option value="0">Tidak Populer</option>
+    </select>
+
+    <select class="filter-select" id="filterSource" onchange="handleSearch()">
+        <option value="">Semua Sumber</option>
+        <option value="single">Single</option>
+        <option value="batch">Batch</option>
+    </select>
+
+    <select class="filter-select" id="sortBy" onchange="handleSearch()">
+        <option value="time_desc">Terbaru</option>
+        <option value="time_asc">Terlama</option>
+        <option value="jumlah_desc">Pinjam Terbanyak</option>
+        <option value="jumlah_asc">Pinjam Tersedikit</option>
+    </select>
+</div>
+
+<!-- ===== TABLE ===== -->
+<div class="panel">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Judul Buku</th>
+                    <th>Author</th>
+                    <th>Publisher</th>
+                    <th>Jml. Pinjam</th>
+                    <th>Tahun</th>
+                    <th>Status</th>
+                    <th>Sumber</th>
+                    <th>Waktu</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+        <div class="empty-icon">
+            <svg width="32" height="32" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </div>
+        <h3>Belum ada riwayat prediksi</h3>
+        <p>Lakukan prediksi di halaman Input Data untuk melihat riwayatnya di sini</p>
+    </div>
+
+    <div class="pagination" id="paginationWrap">
+        <span id="paginationInfo">Menampilkan 0-0 dari 0 data</span>
+        <div class="pages" id="paginationPages"></div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+var PER_PAGE = 15;
+var allData = [];
+var filtered = [];
+var currentPage = 1;
+
+async function loadHistory() {
+    try {
+        var res = await fetch('/history');
+        var data = await res.json();
+        allData = Array.isArray(data) ? data : [];
+        updateSummary(allData);
+        handleSearch();
+    } catch(err) {
+        showToast('Gagal memuat riwayat prediksi');
+        showEmpty();
+    }
+}
+
+function updateSummary(data) {
+    var total = data.length;
+    var pop = data.filter(function(d) { return d.result === 1; }).length;
+    var tidak = total - pop;
+    var rate = total > 0 ? Math.round(pop / total * 100) : 0;
+
+    animateNum('statTotal', total);
+    animateNum('statPop', pop);
+    animateNum('statTidak', tidak);
+    document.getElementById('statRate').textContent = rate + '%';
+}
+
+function animateNum(id, target) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var dur = 600;
+    var startTime = performance.now();
+    function step(now) {
+        var p = Math.min((now - startTime) / dur, 1);
+        var ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * ease).toLocaleString('id-ID');
+        if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+function handleSearch() {
+    var q = document.getElementById('searchInput').value.trim().toLowerCase();
+    var status = document.getElementById('filterStatus').value;
+    var source = document.getElementById('filterSource').value;
+    var sortBy = document.getElementById('sortBy').value;
+
+    filtered = allData.filter(function(d) {
+        var matchQ = !q ||
+            (d.title || '').toLowerCase().indexOf(q) >= 0 ||
+            (d.author || '').toLowerCase().indexOf(q) >= 0 ||
+            (d.publisher || '').toLowerCase().indexOf(q) >= 0;
+        var matchStatus = !status || String(d.result) === status;
+        var matchSource = !source || (d.source || 'single') === source;
+        return matchQ && matchStatus && matchSource;
+    });
+
+    filtered.sort(function(a, b) {
+        if (sortBy === 'time_desc') return new Date(b.time) - new Date(a.time);
+        if (sortBy === 'time_asc')  return new Date(a.time) - new Date(b.time);
+        if (sortBy === 'jumlah_desc') return (b.jumlah_pinjam || 0) - (a.jumlah_pinjam || 0);
+        if (sortBy === 'jumlah_asc')  return (a.jumlah_pinjam || 0) - (b.jumlah_pinjam || 0);
+        return 0;
+    });
+
+    currentPage = 1;
+    renderPage();
+}
+
+function renderPage() {
+    var body = document.getElementById('historyBody');
+    var emptyEl = document.getElementById('emptyState');
+    var paginEl = document.getElementById('paginationWrap');
+
+    if (filtered.length === 0) {
+        body.innerHTML = '';
+        emptyEl.style.display = 'block';
+        paginEl.classList.remove('show');
+        emptyEl.querySelector('h3').textContent =
+            allData.length === 0 ? 'Belum ada riwayat prediksi' : 'Tidak ada hasil yang cocok';
+        emptyEl.querySelector('p').textContent =
+            allData.length === 0 ? 'Lakukan prediksi di halaman Input Data untuk melihat riwayatnya di sini' : 'Coba ubah kata kunci atau filter pencarian';
+        return;
+    }
+
+    emptyEl.style.display = 'none';
+
+    var totalPages = Math.ceil(filtered.length / PER_PAGE);
+    var start = (currentPage - 1) * PER_PAGE;
+    var end = Math.min(start + PER_PAGE, filtered.length);
+    var pageData = filtered.slice(start, end);
+
+    body.innerHTML = pageData.map(function(d, i) {
+        var isPopuler = d.result === 1;
+        var badge = isPopuler
+            ? '<span class="badge badge-pop"><span class="badge-dot"></span>Populer</span>'
+            : '<span class="badge badge-tidak"><span class="badge-dot"></span>Tidak Populer</span>';
+        var sourceBadge = d.source === 'batch'
+            ? '<span class="badge-source">Batch</span>'
+            : '<span class="badge-source badge-source-single">Single</span>';
+
+        var jumlah = (d.jumlah_pinjam || 0).toLocaleString('id-ID');
+
+        return '<tr style="animation: fadeRow 0.2s ease ' + (i * 0.02) + 's both">' +
+            '<td class="td-title" title="' + esc(d.title) + '">' + esc(d.title || '—') + '</td>' +
+            '<td class="td-truncate" title="' + esc(d.author) + '">' + esc(d.author || '—') + '</td>' +
+            '<td class="td-truncate" title="' + esc(d.publisher) + '">' + esc(d.publisher || '—') + '</td>' +
+            '<td class="td-mono">' + jumlah + '</td>' +
+            '<td class="td-mono">' + (d.year || '—') + '</td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + sourceBadge + '</td>' +
+            '<td class="td-time">' + formatTime(d.time) + '</td>' +
+            '</tr>';
+    }).join('');
+
+    document.getElementById('paginationInfo').textContent =
+        'Menampilkan ' + (start + 1) + '–' + end + ' dari ' + filtered.length + ' data';
+
+    renderPagination(totalPages);
+    paginEl.classList.add('show');
+}
+
+function renderPagination(totalPages) {
+    var el = document.getElementById('paginationPages');
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+    var range = getPageRange(currentPage, totalPages);
+    var html = '<button class="page-btn" onclick="goPage(' + (currentPage - 1) + ')"' + (currentPage === 1 ? ' disabled' : '') + '>‹</button>';
+
+    range.forEach(function(p) {
+        if (p === '...') {
+            html += '<span style="padding:0 4px;color:#94a3b8">…</span>';
+        } else {
+            html += '<button class="page-btn' + (p === currentPage ? ' active' : '') + '" onclick="goPage(' + p + ')">' + p + '</button>';
+        }
+    });
+
+    html += '<button class="page-btn" onclick="goPage(' + (currentPage + 1) + ')"' + (currentPage === totalPages ? ' disabled' : '') + '>›</button>';
+    el.innerHTML = html;
+}
+
+function getPageRange(current, total) {
+    if (total <= 7) return Array.from({length: total}, function(_, i) { return i + 1; });
+    var pages = [1];
+    if (current > 3) pages.push('...');
+    for (var i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+    if (current < total - 2) pages.push('...');
+    pages.push(total);
+    return pages;
+}
+
+function goPage(p) {
+    var totalPages = Math.ceil(filtered.length / PER_PAGE);
+    if (p < 1 || p > totalPages) return;
+    currentPage = p;
+    renderPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function downloadHistory() {
+    if (!allData.length) { showToast('Belum ada data untuk diunduh'); return; }
+    var BOM = '﻿';
+    var header = 'Waktu,Judul,Author,Publisher,Jumlah Pinjam,Tahun,Status,Sumber\n';
+    var csv = allData.map(function(d) {
+        var status = d.result === 1 ? 'Populer' : 'Tidak Populer';
+        var time = d.time ? new Date(d.time).toLocaleString('id-ID') : '-';
+        return '"' + time + '","' + esc(d.title) + '","' + esc(d.author) + '","' + esc(d.publisher) + '",' + (d.jumlah_pinjam || 0) + ',' + (d.year || '') + ',' + status + ',' + (d.source || 'single');
+    }).join('\n');
+
+    var blob = new Blob([BOM + header + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'history_prediksi_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV berhasil diunduh');
+}
+
+async function confirmClear() {
+    if (!allData.length) { showToast('Tidak ada riwayat untuk dihapus'); return; }
+    if (!confirm('Hapus semua ' + allData.length + ' riwayat prediksi?')) return;
+
+    try {
+        var res = await fetch('/history', { method: 'DELETE' });
+        if (!res.ok) throw new Error('Server error');
+        allData = [];
+        filtered = [];
+        updateSummary([]);
+        renderPage();
+        showToast('Semua riwayat berhasil dihapus');
+    } catch(err) {
+        showToast('Gagal menghapus riwayat');
+    }
+}
+
+function showEmpty() {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('paginationWrap').classList.remove('show');
+    document.getElementById('historyBody').innerHTML = '';
+}
+
+function formatTime(iso) {
+    if (!iso) return '—';
+    try {
+        var d = new Date(iso);
+        var now = new Date();
+        var diff = Math.floor((now - d) / 1000);
+        if (diff < 60) return 'Baru saja';
+        if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
+        return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch(e) { return iso; }
+}
+
+function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+loadHistory();
+setInterval(loadHistory, 30000);
+</script>
+
+{% endblock %}

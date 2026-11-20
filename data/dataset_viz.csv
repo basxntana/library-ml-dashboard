@@ -1,0 +1,149 @@
+value,jumlah,tipe
+0,145658,kategori
+1,124512,kategori
+agatha christie,635,author
+william shakespeare,567,author
+stephen king,532,author
+ann m. martin,420,author
+francine pascal,420,author
+carolyn keene,372,author
+isaac asimov,344,author
+nora roberts,319,author
+barbara cartland,308,author
+charles dickens,305,author
+harlequin,7526,publisher
+silhouette,4190,publisher
+pocket,3896,publisher
+ballantine books,3775,publisher
+bantam books,3643,publisher
+harpercollins,3360,publisher
+scholastic,3168,publisher
+simon & schuster,2922,publisher
+penguin books,2833,publisher
+berkley publishing group,2764,publisher
+23,17544,book_age
+26,17343,book_age
+24,17266,book_age
+25,17154,book_age
+27,15701,book_age
+28,14832,book_age
+22,14278,book_age
+29,13976,book_age
+30,13497,book_age
+31,11739,book_age
+32,10556,book_age
+33,9863,book_age
+34,9346,book_age
+35,8628,book_age
+36,7913,book_age
+37,7467,book_age
+38,6508,book_age
+39,5824,book_age
+21,5753,book_age
+40,5329,book_age
+41,4961,book_age
+2025,4598,book_age
+42,4484,book_age
+43,4186,book_age
+44,3274,book_age
+45,2671,book_age
+46,2198,book_age
+47,2127,book_age
+48,1892,book_age
+49,1594,book_age
+50,1210,book_age
+51,1018,book_age
+52,920,book_age
+53,769,book_age
+54,540,book_age
+55,458,book_age
+56,338,book_age
+57,232,book_age
+59,182,book_age
+58,176,book_age
+60,173,book_age
+61,148,book_age
+65,133,book_age
+62,132,book_age
+64,132,book_age
+63,123,book_age
+66,103,book_age
+67,77,book_age
+68,76,book_age
+69,74,book_age
+70,70,book_age
+72,63,book_age
+71,54,book_age
+20,43,book_age
+74,40,book_age
+85,36,book_age
+73,33,book_age
+105,33,book_age
+75,32,book_age
+114,19,book_age
+83,14,book_age
+78,14,book_age
+79,13,book_age
+95,13,book_age
+76,11,book_age
+102,11,book_age
+84,10,book_age
+77,9,book_age
+86,9,book_age
+80,8,book_age
+82,8,book_age
+96,7,book_age
+-5,7,book_age
+89,7,book_age
+87,7,book_age
+124,7,book_age
+93,5,book_age
+88,5,book_age
+81,4,book_age
+92,4,book_age
+125,3,book_age
+90,3,book_age
+19,3,book_age
+94,3,book_age
+5,3,book_age
+103,2,book_age
+99,2,book_age
+104,2,book_age
+116,2,book_age
+14,2,book_age
+-25,2,book_age
+123,2,book_age
+101,2,book_age
+100,2,book_age
+97,2,book_age
+98,2,book_age
+15,2,book_age
+111,1,book_age
+647,1,book_age
+1,1,book_age
+-12,1,book_age
+121,1,book_age
+119,1,book_age
+115,1,book_age
+108,1,book_age
+219,1,book_age
+106,1,book_age
+91,1,book_age
+-1,1,book_age
+13,1,book_age
+128,1,book_age
+17,1,book_age
+649,1,book_age
+-13,1,book_age
+117,1,book_age
+4,1,book_age
+"(-1.501, 251.1]",270051,jumlah_pinjam
+"(251.1, 501.2]",100,jumlah_pinjam
+"(501.2, 751.3]",16,jumlah_pinjam
+"(751.3, 1001.4]",1,jumlah_pinjam
+"(1251.5, 1501.6]",1,jumlah_pinjam
+"(2251.9, 2502.0]",1,jumlah_pinjam
+"(1001.4, 1251.5]",0,jumlah_pinjam
+"(1501.6, 1751.7]",0,jumlah_pinjam
+"(1751.7, 2001.8]",0,jumlah_pinjam
+"(2001.8, 2251.9]",0,jumlah_pinjam

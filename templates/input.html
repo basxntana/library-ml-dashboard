@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="page-wrap">
+
+    <!-- PAGE TITLE -->
+    <div class="page-head">
+        <h1>Input Data Peminjaman</h1>
+        <p>Catat data peminjaman buku baru dan unduh sebagai file CSV</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card">
+        <form id="formInput">
+
+            <div class="row">
+                <div class="field field-lg">
+                    <input name="title" id="titleInput" placeholder="Judul Buku..." autocomplete="off" required>
+                    <div id="titleSuggest" class="suggestions"></div>
+                </div>
+                <div class="field">
+                    <input name="author" placeholder="Author...">
+                </div>
+                <div class="field">
+                    <input name="publisher" placeholder="Publisher...">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <input type="number" name="jumlah_pinjam" placeholder="Jumlah Pinjam" min="0" required>
+                </div>
+                <div class="field">
+                    <input type="number" name="year" placeholder="Tahun" min="1900" max="2025" required>
+                </div>
+                <div class="field">
+                    <input type="date" name="tanggal" required>
+                </div>
+                <button type="submit" class="btn-add">+ Tambah</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="card">
+        <div class="table-header">
+            <h3 class="table-title"> Data Tersimpan</h3>
+            <div class="table-actions">
+                <button onclick="downloadCSV()" class="btn-download"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download CSV</button>
+                <button onclick="resetTable()" class="btn-reset"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>Reset</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table id="tableData">
+                <thead>
+                    <tr>
+                        <th>Judul</th>
+                        <th>Author</th>
+                        <th>Publisher</th>
+                        <th>Jumlah</th>
+                        <th>Tahun</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr class="empty-row">
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+                                <p>Belum ada data tersimpan</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+.page-wrap {
+    max-width: 1300px;
+}
+
+.page-header { margin-bottom: 22px; }
+
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e2a3a;
+}
+
+/* CARD */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(30,42,58,0.07);
+}
+
+/* FORM */
+.row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.row:last-child { margin-bottom: 0; }
+
+.field { position: relative; flex: 1; }
+.field-lg { flex: 2; }
+
+input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: #1e2a3a;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+input::placeholder { color: #a0aec0; }
+
+/* BUTTONS */
+.btn-add {
+    padding: 10px 22px;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 3px 10px rgba(99,102,241,0.25);
+}
+.btn-add:hover { background: #4f46e5; transform: translateY(-1px); }
+
+.btn-download, .btn-reset {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+}
+
+.btn-download {
+    background: #eef2ff;
+    color: #6366f1;
+    border: 1px solid #c7d2fe;
+}
+.btn-download:hover { background: #6366f1; color: #fff; }
+
+.btn-reset {
+    background: #fff5f5;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+.btn-reset:hover { background: #ef4444; color: #fff; }
+
+/* AUTOCOMPLETE */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    max-height: 190px;
+    overflow-y: auto;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(30,42,58,0.1);
+    display: none;
+}
+.suggestions:not(:empty) { display: block; }
+.suggestions div {
+    padding: 9px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.12s;
+}
+.suggestions div:last-child { border-bottom: none; }
+.suggestions div:hover { background: #eef2ff; color: #4f46e5; }
+
+/* TABLE HEADER */
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.table-title { font-size: 16px; font-weight: 600; color: #1e2a3a; }
+.table-actions { display: flex; gap: 10px; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+
+thead { background: #f8fafc; }
+
+th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+tbody tr:hover { background: #f8fafc; }
+tbody tr:last-child td { border-bottom: none; }
+
+.btn-del {
+    padding: 4px 12px;
+    background: #fff5f5;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-del:hover { background: #ef4444; color: #fff; }
+
+/* EMPTY STATE */
+.empty-row td { padding: 50px 20px; }
+.empty-state { text-align: center; color: #a0aec0; }
+.empty-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-state p { font-size: 13.5px; }
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: #1e2a3a;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-family: inherit;
+    box-shadow: 0 8px 24px rgba(30,42,58,0.18);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.28s ease;
+    pointer-events: none;
+    z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .row { flex-wrap: wrap; }
+    .field-lg { flex: 1 1 100%; }
+    .field { flex: 1 1 calc(50% - 6px); }
+    .btn-add { width: 100%; }
+}
+</style>
+
+<script>
+let tableData = []
+
+function showToast(msg) {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.classList.add('show')
+    setTimeout(() => t.classList.remove('show'), 2600)
+}
+
+// AUTOCOMPLETE
+document.getElementById('titleInput').addEventListener('input', async function () {
+    const val = this.value.trim()
+    const box = document.getElementById('titleSuggest')
+    if (val.length < 2) { box.innerHTML = ''; return }
+    try {
+        const res = await fetch(`/autocomplete?q=${encodeURIComponent(val)}&field=title`)
+        const data = await res.json()
+        box.innerHTML = data.map(d => {
+            const safe = d.replace(/'/g, "\\'")
+            return `<div onclick="selectItem('${safe}')">${d}</div>`
+        }).join('')
+    } catch { box.innerHTML = '' }
+})
+
+async function selectItem(val) {
+    document.querySelector('[name=title]').value = val
+    document.getElementById('titleSuggest').innerHTML = ''
+    try {
+        const res = await fetch(`/book-detail?title=${encodeURIComponent(val)}`)
+        const data = await res.json()
+        if (data.author) document.querySelector('[name=author]').value = data.author
+        if (data.publisher) document.querySelector('[name=publisher]').value = data.publisher
+        if (data.year) document.querySelector('[name=year]').value = data.year
+        if (data.jumlah_pinjam) document.querySelector('[name=jumlah_pinjam]').value = data.jumlah_pinjam
+    } catch {}
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.field')) document.getElementById('titleSuggest').innerHTML = ''
+})
+
+// SUBMIT
+document.getElementById('formInput').addEventListener('submit', function (e) {
+    e.preventDefault()
+    const data = Object.fromEntries(new FormData(this))
+    if (!data.title.trim()) return showToast('⚠️ Judul buku wajib diisi')
+    tableData.push(data)
+    renderTable()
+    this.reset()
+    showToast('✅ Data berhasil ditambahkan')
+})
+
+// RENDER
+function renderTable() {
+    const tbody = document.getElementById('tableBody')
+    if (!tableData.length) {
+        tbody.innerHTML = `
+            <tr class="empty-row">
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+                        <p>Belum ada data tersimpan</p>
+                    </div>
+                </td>
+            </tr>`
+        return
+    }
+    tbody.innerHTML = tableData.map((d, i) => `
+        <tr>
+            <td title="${d.title}">${d.title}</td>
+            <td>${d.author || '—'}</td>
+            <td>${d.publisher || '—'}</td>
+            <td>${Number(d.jumlah_pinjam).toLocaleString()}</td>
+            <td>${d.year}</td>
+            <td>${d.tanggal}</td>
+            <td><button class="btn-del" onclick="deleteRow(${i})">Hapus</button></td>
+        </tr>
+    `).join('')
+}
+
+function deleteRow(i) {
+    tableData.splice(i, 1)
+    renderTable()
+    showToast('🗑 Data dihapus')
+}
+
+function resetTable() {
+    if (!tableData.length) return showToast('⚠️ Tidak ada data')
+    if (confirm('Hapus semua data?')) {
+        tableData = []
+        renderTable()
+        showToast('🗑 Semua data direset')
+    }
+}
+
+function downloadCSV() {
+    if (!tableData.length) return showToast('⚠️ Data masih kosong')
+    let csv = 'Book_Title,Book_Author,Publisher,jumlah_pinjam,Year,Tanggal\n'
+    tableData.forEach(d => {
+        csv += `"${d.title}","${d.author}","${d.publisher}",${d.jumlah_pinjam},${d.year},${d.tanggal}\n`
+    })
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `data_peminjaman_${new Date().toISOString().slice(0,10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast('⬇ CSV berhasil diunduh')
+}
+</script>
+
+{% endblock %}

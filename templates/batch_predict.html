@@ -1,0 +1,1117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* ===== HEADER ===== */
+.bp-header { margin-bottom: 28px; }
+.bp-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+}
+.bp-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone {
+    background: #fff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 20px;
+    padding: 48px 32px;
+    margin-bottom: 28px;
+    text-align: center;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    position: relative;
+}
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #6366f1;
+    background: #f8faff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(99,102,241,0.08);
+}
+
+.upload-zone input[type="file"] { display: none; }
+
+.upload-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+.upload-zone:hover .upload-icon { transform: scale(1.05); }
+
+.upload-icon svg { color: #6366f1; }
+
+.upload-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.upload-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.upload-btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-choose {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+.btn-choose:hover { background: #e2e8f0; }
+
+#btnAnalyze {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #4f46e5, #4f46e5);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.25);
+}
+#btnAnalyze:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.3); }
+#btnAnalyze:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.spinner-icon {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+}
+#btnAnalyze.loading .spinner-icon { display: block; }
+#btnAnalyze.loading .btn-text::before { content: 'Memproses...'; }
+#btnAnalyze:not(.loading) .btn-text::before { content: 'Analyze Data'; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#fileName {
+    display: block;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* ===== BANNERS ===== */
+.banner {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.banner.show { display: flex; }
+
+.banner-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+}
+.banner-success {
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    justify-content: space-between;
+}
+
+.banner-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.btn-go-history {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: #166534;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+.btn-go-history:hover { background: #14532d; }
+
+/* ===== STAT CARDS ===== */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+}
+.stat-card.s-blue::before   { background: linear-gradient(90deg, #4f46e5, #6366f1); }
+.stat-card.s-green::before  { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.stat-card.s-red::before    { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.stat-card.s-purple::before { background: linear-gradient(90deg, #7c3aed, #8b5cf6); }
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin: 0 0 8px;
+}
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+    margin: 0;
+}
+.stat-card.s-green .stat-value  { color: #16a34a; }
+.stat-card.s-red .stat-value    { color: #dc2626; }
+.stat-card.s-purple .stat-value { color: #7c3aed; }
+
+/* ===== INSIGHT ===== */
+.insight-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.insight-banner::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+    pointer-events: none;
+}
+.insight-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+.insight-tag svg { width: 10px; height: 10px; }
+#insightText {
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+}
+#insightText strong { color: #fff; font-weight: 600; }
+
+/* ===== CHART PANELS ===== */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+}
+@media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+.panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px 24px;
+}
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.panel-tag {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+.chart-box {
+    position: relative;
+    height: 240px;
+}
+.chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+.chart-empty {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #94a3b8;
+    flex-direction: column;
+    gap: 8px;
+}
+.chart-box.empty .chart-empty { display: flex; }
+.chart-box.empty canvas { visibility: hidden; }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #f8fafc; }
+th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; }
+tbody tr:hover td { background: #f8fafc; }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-pop  { background: #dcfce7; color: #166534; }
+.badge-tidak { background: #fee2e2; color: #991b1b; }
+.badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+}
+.badge-pop .badge-dot  { background: #16a34a; }
+.badge-tidak .badge-dot { background: #ef4444; }
+
+.td-truncate {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: inherit;
+    text-decoration: none;
+}
+.btn-dl {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+.btn-dl:hover { background: #e2e8f0; }
+.btn-hist {
+    display: none;
+    background: #0f172a;
+    color: #fff;
+}
+.btn-hist:hover { background: #1e293b; }
+.btn-hist.show { display: inline-flex; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 72px 20px;
+    color: #94a3b8;
+}
+.empty-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 6px;
+}
+.empty-state p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ===== RESULTS ===== */
+#results-section { display: none; }
+#results-section.show { display: block; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<!-- ===== HEADER ===== -->
+<div class="bp-header">
+    <h2>Batch Prediction</h2>
+    <p>Upload file CSV untuk prediksi popularitas koleksi perpustakaan secara massal</p>
+</div>
+
+<!-- ===== UPLOAD ZONE ===== -->
+<div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept=".csv">
+
+    <div class="upload-icon">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+    </div>
+
+    <div class="upload-title">Drag & drop file CSV di sini</div>
+    <div class="upload-desc">atau klik tombol di bawah untuk memilih file</div>
+
+    <div class="upload-btn-row">
+        <label class="btn-choose" for="fileInput">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Pilih File
+        </label>
+
+        <button id="btnAnalyze" onclick="upload()">
+            <div class="spinner-icon"></div>
+            <span class="btn-text"></span>
+        </button>
+    </div>
+
+    <span id="fileName">Belum ada file dipilih</span>
+</div>
+
+<!-- ===== BANNERS ===== -->
+<div class="banner banner-error" id="errorBanner"></div>
+<div class="banner banner-success" id="successBanner">
+    <div class="banner-text">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="successMsg">Data berhasil diprediksi</span>
+    </div>
+    <a href="/history-page" class="btn-go-history">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+        </svg>
+        Lihat Riwayat
+    </a>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="results-section">
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+        <div class="stat-card s-blue">
+            <div class="stat-label">Total Data</div>
+            <div class="stat-value" id="total">0</div>
+        </div>
+        <div class="stat-card s-green">
+            <div class="stat-label">Populer</div>
+            <div class="stat-value" id="populer">0</div>
+        </div>
+        <div class="stat-card s-red">
+            <div class="stat-label">Tidak Populer</div>
+            <div class="stat-value" id="tidak">0</div>
+        </div>
+        <div class="stat-card s-purple">
+            <div class="stat-label">Rasio Populer</div>
+            <div class="stat-value" id="pct">0%</div>
+        </div>
+    </div>
+
+    <!-- AI INSIGHT -->
+    <div class="insight-banner">
+        <div class="insight-tag">
+            <svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#a5b4fc" opacity="0.6"/><circle cx="5" cy="5" r="2" fill="#a5b4fc"/></svg>
+            AI Insight
+        </div>
+        <p id="insightText">Belum ada analisis.</p>
+    </div>
+
+    <!-- DISTRIBUSI -->
+    <div class="grid-2">
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Distribusi Popularitas</div>
+                <div class="panel-tag">kategori</div>
+            </div>
+            <div class="chart-box" id="wrapDistribusi">
+                <canvas id="chartDistribusi"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Distribusi Jumlah Peminjaman</div>
+                <div class="panel-tag">histogram</div>
+            </div>
+            <div class="chart-box" id="wrapDistribusiPinjam">
+                <canvas id="chartDistribusiPinjam"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TREND -->
+    <div class="grid-3">
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Trend Mingguan</div>
+                <div class="panel-tag">weekly</div>
+            </div>
+            <div class="chart-box" id="wrapWeek">
+                <canvas id="chartWeek"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Trend Bulanan</div>
+                <div class="panel-tag">monthly</div>
+            </div>
+            <div class="chart-box" id="wrapMonth">
+                <canvas id="chartMonth"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Trend Tahunan</div>
+                <div class="panel-tag">yearly</div>
+            </div>
+            <div class="chart-box" id="wrapYear">
+                <canvas id="chartYear"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP CHARTS -->
+    <div class="grid-3">
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Top Buku</div>
+                <div class="panel-tag">by pinjam</div>
+            </div>
+            <div class="chart-box" id="wrapBook">
+                <canvas id="chartBook"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Top Author</div>
+                <div class="panel-tag">by pinjam</div>
+            </div>
+            <div class="chart-box" id="wrapAuthor">
+                <canvas id="chartAuthor"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <div class="panel-title">Top Publisher</div>
+                <div class="panel-tag">by pinjam</div>
+            </div>
+            <div class="chart-box" id="wrapPublisher">
+                <canvas id="chartPublisher"></canvas>
+                <div class="chart-empty">Tidak ada data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="panel">
+        <div class="panel-head">
+            <div class="panel-title">Hasil Prediksi</div>
+            <div class="panel-tag" id="tableCount"></div>
+        </div>
+        <div class="table-wrap">
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>Judul</th>
+                        <th>Author</th>
+                        <th>Publisher</th>
+                        <th>Jml. Pinjam</th>
+                        <th>Tahun</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-action btn-dl" onclick="downloadResult()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download CSV
+            </button>
+            <a href="/history-page" id="btnHistory" class="btn-action btn-hist">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>
+                </svg>
+                Lihat di Riwayat
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- EMPTY STATE -->
+<div class="empty-state" id="emptyState">
+    <div class="empty-icon">
+        <svg width="32" height="32" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+    </div>
+    <h3>Belum ada data</h3>
+    <p>Upload file CSV untuk melihat hasil prediksi dan analitik</p>
+</div>
+
+<script>
+Chart.defaults.font.size = 12;
+
+let charts = {};
+let resultData = [];
+
+// ===========================
+// DRAG & DROP
+// ===========================
+const zone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+zone.addEventListener('click', function(e) {
+    if (e.target.closest('#btnAnalyze') || e.target.closest('.btn-choose')) return;
+    fileInput.click();
+});
+
+['dragenter','dragover'].forEach(e => {
+    zone.addEventListener(e, function(ev) { ev.preventDefault(); zone.classList.add('dragover'); });
+});
+['dragleave','drop'].forEach(e => {
+    zone.addEventListener(e, function(ev) { ev.preventDefault(); zone.classList.remove('dragover'); });
+});
+zone.addEventListener('drop', function(e) {
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+        fileInput.files = e.dataTransfer.files;
+        document.getElementById('fileName').textContent = file.name;
+    }
+});
+
+fileInput.onchange = function() {
+    const name = this.files[0]?.name;
+    document.getElementById('fileName').textContent = name || 'Belum ada file dipilih';
+    hideError();
+    document.getElementById('successBanner').classList.remove('show');
+    document.getElementById('btnHistory').classList.remove('show');
+};
+
+// ===========================
+// ERROR / SUCCESS
+// ===========================
+function showError(msg) {
+    const el = document.getElementById('errorBanner');
+    el.textContent = msg;
+    el.classList.add('show');
+}
+function hideError() {
+    document.getElementById('errorBanner').classList.remove('show');
+}
+
+function getField(row, ...keys) {
+    for (const k of keys) {
+        if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
+    }
+    return '-';
+}
+
+// ===========================
+// UPLOAD
+// ===========================
+async function upload() {
+    const file = fileInput.files[0];
+    if (!file) { showError('Pilih file CSV terlebih dahulu.'); return; }
+
+    hideError();
+    document.getElementById('successBanner').classList.remove('show');
+    document.getElementById('btnHistory').classList.remove('show');
+
+    const btn = document.getElementById('btnAnalyze');
+    btn.disabled = true;
+    btn.classList.add('loading');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await fetch('/predict-batch', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Server error: ' + res.status);
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        renderAll(data);
+
+        const total = data.rows?.length || 0;
+        document.getElementById('successMsg').textContent =
+            total.toLocaleString('id-ID') + ' data berhasil diprediksi dan disimpan ke riwayat';
+        document.getElementById('successBanner').classList.add('show');
+        document.getElementById('btnHistory').classList.add('show');
+        document.getElementById('successBanner').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch (err) {
+        showError(err.message || 'Gagal memproses data.');
+    } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+    }
+}
+
+// ===========================
+// ANIMATE NUMBER
+// ===========================
+function animateNum(el, target) {
+    if (!el) return;
+    const dur = 600;
+    const start = performance.now();
+    function step(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * ease).toLocaleString('id-ID');
+        if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+// ===========================
+// RENDER ALL
+// ===========================
+function renderAll(data) {
+    const rows  = Array.isArray(data.rows) ? data.rows : [];
+    const total = rows.length;
+    const pop   = data.populer ?? rows.filter(r => (r.prediction ?? r.prediksi) == 1).length;
+    const tidak = data.tidak ?? (total - pop);
+    const pct   = total > 0 ? ((pop / total) * 100).toFixed(1) : 0;
+
+    animateNum(document.getElementById('total'), total);
+    animateNum(document.getElementById('populer'), pop);
+    animateNum(document.getElementById('tidak'), tidak);
+    document.getElementById('pct').textContent = pct + '%';
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('results-section').classList.add('show');
+    document.getElementById('tableCount').textContent = total + ' baris';
+
+    renderChart('chartDistribusi', 'doughnut',
+        ['Populer', 'Tidak Populer'], [pop, tidak],
+        { colors: ['#22c55e', '#f87171'], hoverColors: ['#16a34a', '#ef4444'], wrapper: 'wrapDistribusi' });
+
+    renderChart('chartDistribusiPinjam', 'bar',
+        data.dist_labels ?? [], data.dist_values ?? [],
+        { gradient: ['#6366f1', '#a78bfa'], wrapper: 'wrapDistribusiPinjam' });
+
+    renderChart('chartWeek', 'line',
+        data.labels_week ?? [], data.values_week ?? [],
+        { gradient: ['#6366f1', '#06b6d4'], wrapper: 'wrapWeek', fill: true });
+
+    renderChart('chartMonth', 'bar',
+        data.labels_month ?? [], data.values_month ?? [],
+        { gradient: ['#6366f1', '#818cf8'], wrapper: 'wrapMonth' });
+
+    renderChart('chartYear', 'bar',
+        data.labels_year ?? [], data.values_year ?? [],
+        { gradient: ['#0ea5e9', '#38bdf8'], wrapper: 'wrapYear' });
+
+    renderChart('chartBook', 'bar',
+        data.top_books_labels ?? [], data.top_books_values ?? [],
+        { gradient: ['#8b5cf6', '#c084fc'], wrapper: 'wrapBook', horizontal: true });
+
+    renderChart('chartAuthor', 'bar',
+        data.top_author_labels ?? [], data.top_author_values ?? [],
+        { gradient: ['#f59e0b', '#fbbf24'], wrapper: 'wrapAuthor', horizontal: true });
+
+    renderChart('chartPublisher', 'bar',
+        data.top_publisher_labels ?? [], data.top_publisher_values ?? [],
+        { gradient: ['#14b8a6', '#5eead4'], wrapper: 'wrapPublisher', horizontal: true });
+
+    resultData = rows;
+    renderTable(rows);
+    generateInsight({ total, pop, tidak, pct, data });
+}
+
+// ===========================
+// INSIGHT
+// ===========================
+function generateInsight({ total, pop, tidak, pct, data }) {
+    if (total === 0) { document.getElementById('insightText').textContent = 'Tidak ada data.'; return; }
+    let p = [];
+
+    if (pct >= 70) p.push('<strong>' + pct + '%</strong> koleksi diprediksi populer — tingkat minat pembaca sangat tinggi.');
+    else if (pct >= 40) p.push('<strong>' + pct + '%</strong> koleksi diprediksi populer — distribusi cukup seimbang.');
+    else p.push('Hanya <strong>' + pct + '%</strong> koleksi diprediksi populer — sebagian besar kurang diminati.');
+
+    const topBook = (data.top_books_labels ?? [])[0];
+    if (topBook) p.push('Buku terpopuler: <strong>' + topBook + '</strong>.');
+
+    const topAuthor = (data.top_author_labels ?? [])[0];
+    if (topAuthor) p.push('Penulis dominan: <strong>' + topAuthor + '</strong>.');
+
+    if (pct < 40) p.push('Rekomendasi: evaluasi dan pembaruan koleksi untuk meningkatkan relevansi.');
+    else if (pct > 75) p.push('Rekomendasi: pertahankan pola pengadaan yang sudah baik.');
+
+    document.getElementById('insightText').innerHTML = p.join(' ');
+}
+
+// ===========================
+// TABLE
+// ===========================
+function renderTable(rows) {
+    const tbody = document.querySelector('#resultTable tbody');
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:40px">Tidak ada data</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = rows.map(r => {
+        const title  = getField(r, 'Book_Title', 'book_title', 'title');
+        const author = getField(r, 'Book_Author', 'book_author', 'author');
+        const pub    = getField(r, 'Publisher', 'publisher');
+        const jumlah = getField(r, 'jumlah_pinjam', 'jumlah');
+        const year   = getField(r, 'Year', 'year');
+        const tgl    = getField(r, 'Tanggal', 'tanggal', 'date');
+        const pred   = r.prediction ?? r.prediksi ?? 0;
+        const isPop  = pred == 1 || pred === 'Populer';
+
+        const badge = isPop
+            ? '<span class="badge badge-pop"><span class="badge-dot"></span>Populer</span>'
+            : '<span class="badge badge-tidak"><span class="badge-dot"></span>Tidak Populer</span>';
+
+        let tglFmt = '-';
+        if (tgl && tgl !== '-') { try { tglFmt = new Date(tgl).toLocaleDateString('id-ID'); } catch { tglFmt = tgl; } }
+
+        return '<tr>' +
+            '<td class="td-truncate" title="' + title + '">' + title + '</td>' +
+            '<td class="td-truncate" title="' + author + '">' + author + '</td>' +
+            '<td class="td-truncate" title="' + pub + '">' + pub + '</td>' +
+            '<td>' + jumlah + '</td>' +
+            '<td>' + year + '</td>' +
+            '<td>' + tglFmt + '</td>' +
+            '<td>' + badge + '</td>' +
+            '</tr>';
+    }).join('');
+}
+
+// ===========================
+// DOWNLOAD
+// ===========================
+function downloadResult() {
+    if (!resultData.length) { showError('Tidak ada data untuk diunduh.'); return; }
+    const BOM = '﻿';
+    const hdr = 'Judul,Author,Publisher,Jumlah Pinjam,Tahun,Tanggal,Status\n';
+    const body = resultData.map(r => {
+        const t = getField(r,'Book_Title','title');
+        const a = getField(r,'Book_Author','author');
+        const p = getField(r,'Publisher','publisher');
+        const j = getField(r,'jumlah_pinjam','jumlah');
+        const y = getField(r,'Year','year');
+        const d = getField(r,'Tanggal','tanggal');
+        const s = (r.prediction ?? 0) == 1 ? 'Populer' : 'Tidak Populer';
+        return '"'+t+'","'+a+'","'+p+'",'+j+','+y+','+d+','+s;
+    }).join('\n');
+
+    const blob = new Blob([BOM + hdr + body], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hasil_prediksi_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ===========================
+// GRADIENT HELPER
+// ===========================
+function makeGradient(ctx, colors, horizontal) {
+    var canvas = ctx.canvas;
+    var grad = horizontal
+        ? ctx.createLinearGradient(0, 0, canvas.width, 0)
+        : ctx.createLinearGradient(0, canvas.height, 0, 0);
+    grad.addColorStop(0, colors[0]);
+    grad.addColorStop(1, colors[1]);
+    return grad;
+}
+
+function makeFillGradient(ctx, color) {
+    var grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+    grad.addColorStop(0, color + '30');
+    grad.addColorStop(1, color + '02');
+    return grad;
+}
+
+// ===========================
+// CHART RENDERER
+// ===========================
+function renderChart(id, type, labels, values, opts) {
+    opts = opts || {};
+    var colors = opts.colors;
+    var hoverColors = opts.hoverColors;
+    var gradient = opts.gradient;
+    var wrapper = opts.wrapper;
+    var fill = opts.fill || false;
+    var horizontal = opts.horizontal || false;
+
+    var canvas = document.getElementById(id);
+    var wrapEl = wrapper ? document.getElementById(wrapper) : null;
+    if (!canvas) return;
+
+    var isEmpty = !labels || !labels.length || !values || !values.length || values.every(function(v) { return !v; });
+    if (wrapEl) wrapEl.classList.toggle('empty', isEmpty);
+    if (isEmpty) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } return; }
+    if (charts[id]) charts[id].destroy();
+
+    var ctx = canvas.getContext('2d');
+    var bg, border, hoverBg;
+
+    if (type === 'doughnut') {
+        bg = colors || ['#4f46e5', '#64748b'];
+        hoverBg = hoverColors || bg;
+    } else if (type === 'line') {
+        border = gradient ? makeGradient(ctx, gradient, false) : '#4f46e5';
+        bg = fill ? makeFillGradient(ctx, gradient ? gradient[0] : '#4f46e5') : 'transparent';
+    } else {
+        bg = gradient ? makeGradient(ctx, gradient, horizontal) : '#4f46e5';
+    }
+
+    charts[id] = new Chart(canvas, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah',
+                data: values,
+                backgroundColor: bg,
+                hoverBackgroundColor: type === 'doughnut' ? hoverBg : undefined,
+                borderColor: type === 'line' ? border : type === 'doughnut' ? '#fff' : 'transparent',
+                borderRadius: type === 'bar' ? { topLeft: 8, topRight: 8, bottomLeft: horizontal ? 8 : 0, bottomRight: horizontal ? 8 : 0 } : 0,
+                borderWidth: type === 'line' ? 2.5 : type === 'doughnut' ? 3 : 0,
+                borderSkipped: false,
+                fill: fill,
+                tension: 0.4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: gradient ? gradient[0] : '#4f46e5',
+                pointBorderWidth: 2.5,
+                pointRadius: 4,
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: gradient ? gradient[0] : '#4f46e5',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2,
+                barPercentage: 0.7,
+                categoryPercentage: 0.8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: horizontal ? 'y' : 'x',
+            animation: {
+                duration: 800,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: type === 'doughnut',
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 12, weight: '500' },
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 20,
+                        color: '#475569'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15,23,42,0.95)',
+                    titleFont: { size: 13, weight: '600' },
+                    bodyFont: { size: 12 },
+                    padding: { top: 10, bottom: 10, left: 14, right: 14 },
+                    cornerRadius: 10,
+                    displayColors: type === 'doughnut',
+                    boxPadding: 4,
+                    callbacks: {
+                        label: function(c) {
+                            var val = c.parsed !== undefined ? (typeof c.parsed === 'object' ? (horizontal ? c.parsed.x : c.parsed.y) : c.parsed) : c.raw;
+                            return ' ' + (val || 0).toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: type !== 'doughnut' ? {
+                x: {
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { size: 11 },
+                        maxRotation: 0,
+                        padding: 6,
+                        callback: function(v) {
+                            var l = this.getLabelForValue(v);
+                            return typeof l === 'string' && l.length > 14 ? l.slice(0, 14) + '…' : l;
+                        }
+                    },
+                    grid: { display: false },
+                    border: { display: false }
+                },
+                y: {
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { size: 11 },
+                        padding: 8,
+                        callback: function(v) {
+                            if (typeof v === 'number' && v >= 1000) return (v / 1000).toFixed(0) + 'K';
+                            return v;
+                        }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                    border: { display: false }
+                }
+            } : {},
+            cutout: type === 'doughnut' ? '68%' : undefined
+        }
+    });
+}
+</script>
+
+{% endblock %}
