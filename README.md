@@ -4,11 +4,11 @@
 
 | | |
 |---|---|
-| **Penulis** | _[Nama Lengkap]_ — _[NPM]_ |
-| **Program Studi** | _[Program Studi]_, _[Fakultas]_ |
-| **Universitas** | _[Nama Universitas]_ |
-| **Dosen Pembimbing** | _[Nama Dosen Pembimbing]_ |
-| **Tahun** | _[Tahun]_ |
+| **Penulis** | Baskara Kresna Juniarto — 50423260 |
+| **Program Studi** | Informatika, Fakultas Teknologi Industri |
+| **Universitas** | Universitas Gunadarma |
+| **Dosen Pembimbing** | Dini Triasanti, ST., MMSI. |
+| **Tahun** | 2026 |
 
 ![Dashboard](docs/images/dashboard.png)
 
